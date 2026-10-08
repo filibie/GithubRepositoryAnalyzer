@@ -2,7 +2,8 @@ import pytest
 
 from github_analyzer.analyzer import (
     parse_repository_url,
-    calculate_language_percentages
+    calculate_language_percentages,
+    analyze_tree
 )
 
 def test_parse_repository_url():
@@ -60,3 +61,25 @@ def test_calculate_language_percentages_with_multiple_languages():
     assert result["Python"] == 50
     assert result["Java"] == 30
     assert result["C"] == 20
+
+
+def test_analyze_tree():
+    tree = [
+        {"path": "README.md", "type": "blob"},
+        {"path": "src", "type": "tree"},
+        {"path": "src/main.py", "type": "blob"},
+        {"path": "tests", "type": "tree"},
+        {"path": "tests/test_main.py", "type": "blob"},
+    ]
+
+    result = analyze_tree(tree)
+
+    assert result["files"] == 3
+    assert result["directories"] == 2
+
+
+def test_analyze_tree_with_empty_tree():
+    result = analyze_tree([])
+
+    assert result["files"] == 0
+    assert result["directories"] == 0
