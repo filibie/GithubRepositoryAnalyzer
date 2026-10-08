@@ -1,10 +1,11 @@
 import pytest
 
-from github_analyzer.analyzer import (
-    parse_repository_url,
+from github_analyzer.github import parse_repository_url
+
+from github_analyzer.analysis import (
     calculate_language_percentages,
-    analyze_tree,
-    analyze_files
+    analyze_files,
+    analyze_tree
 )
 
 def test_parse_repository_url():

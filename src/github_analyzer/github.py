@@ -1,3 +1,7 @@
+from urllib.parse import urlparse
+
+import requests
+
 def parse_repository_url(url: str) -> tuple[str, str]:
     parsed_url = urlparse(url)
 
