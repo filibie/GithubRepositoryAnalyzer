@@ -3,7 +3,8 @@ import pytest
 from github_analyzer.analyzer import (
     parse_repository_url,
     calculate_language_percentages,
-    analyze_tree
+    analyze_tree,
+    analyze_files
 )
 
 def test_parse_repository_url():
@@ -83,3 +84,33 @@ def test_analyze_tree_with_empty_tree():
 
     assert result["files"] == 0
     assert result["directories"] == 0
+
+
+def test_analyze_files():
+    tree = [
+        {"path": "src/main.py", "type": "blob", "size": 5000},
+        {"path": "src/utils.py", "type": "blob", "size": 2000},
+        {"path": "tests/test_main.py", "type": "blob", "size": 1500},
+        {"path": "src/user_test.py", "type": "blob", "size": 1200},
+        {"path": "README.md", "type": "blob", "size": 1000},
+        {"path": "src/small.py", "type": "blob", "size": 500},
+        {"path": "src", "type": "tree"},
+    ]
+
+    result = analyze_files(tree)
+
+    assert result["total_files"] == 6
+    assert result["extensions"][".py"] == 5
+    assert result["extensions"][".md"] == 1
+    assert result["test_files"] == 2
+
+    assert len(result["largest_files"]) == 5
+    assert all(
+        file["path"] != "src/small.py"
+        for file in result["largest_files"]
+    )
+    assert result["largest_files"][0]["path"] == "src/main.py"
+    assert result["largest_files"][0]["size"] == 5000
+
+    assert result["largest_files"][1]["path"] == "src/utils.py"
+    assert result["largest_files"][1]["size"] == 2000
