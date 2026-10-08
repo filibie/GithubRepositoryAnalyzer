@@ -1,6 +1,6 @@
 import pytest
 
-from main import (
+from github_analyzer.analyzer import (
     parse_repository_url,
     calculate_language_percentages
 )

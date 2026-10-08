@@ -67,7 +67,7 @@ def get_languages(owner: str, repo: str) -> dict:
     return response.json()
 
 
-def calculate_language_percentages(languages: dict) -> dict:
+def calculate_language_percentages(languages: dict[str, int]) -> dict[str, float]:
     total = sum(languages.values())
 
     percentages = {}
@@ -91,6 +91,28 @@ def print_languages(percentages: dict) -> None:
         print(f"{language:<15} {percentage:>6.2f}%")
 
 
+def get_repository_tree(owner: str, repo: str, branch: str) -> list:
+    api_url = (
+        f"https://api.github.com/repos/"
+        f"{owner}/{repo}/git/trees/{branch}?recursive=1"
+    )
+
+    response = requests.get(api_url)
+    response.raise_for_status()
+
+    return response.json()["tree"]
+
+
+def analyze_tree(tree: list) -> dict:
+    files = [item for item in tree if item["type"] == "blob"]
+    directories = [item for item in tree if item["type"] == "tree"]
+
+    return {
+        "files": len(files),
+        "directories": len(directories)
+    }
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage:")
@@ -103,13 +125,18 @@ def main() -> None:
         owner, repo = parse_repository_url(url)
 
         repository = get_repository(url)
-        
+        branch = repository["default_branch"]
+
         languages = get_languages(owner, repo)
         percentages = calculate_language_percentages(languages)
-        
+
+        tree = get_repository_tree(owner, repo, branch)
+        statistics = analyze_tree(tree)
+
         print_repository_info(repository)
         print_languages(percentages)
-
+        print(f"Files:           {statistics['files']}")
+        print(f"Directories:     {statistics['directories']}")
     except requests.RequestException as error:
         print(f"Network error: {error}")
 
