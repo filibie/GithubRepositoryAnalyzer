@@ -57,7 +57,6 @@ def print_repository_info(repository: dict) -> None:
     print(f"License:     {repository['license']['name'] if repository['license'] else 'None'}")
     print(f"Created:     {repository['created_at'][:10]}")
     print(f"Updated:     {repository['updated_at'][:10]}")
-    print()
 
 
 def get_languages(owner: str, repo: str) -> dict:
@@ -167,11 +166,30 @@ def main() -> None:
 
         tree = get_repository_tree(owner, repo, branch)
         statistics = analyze_tree(tree)
+        file_analysis = analyze_files(tree)
 
         print_repository_info(repository)
         print_languages(percentages)
-        print(f"Files:           {statistics['files']}")
-        print(f"Directories:     {statistics['directories']}")
+        print("\nFiles")
+        print("-" * 50)
+
+        print(f"Total files: {file_analysis['total_files']}")
+        print(f"Test files:  {file_analysis["test_files"]}")
+
+        print("\nFile types")
+        for extension, count in sorted(
+            file_analysis["extensions"].items(),
+            key=lambda item: item[1],
+            reverse=True
+        ):
+            print(f"{extension or '[no extension]':<15} {count}")
+
+        print("\nLargest files")
+        for file in file_analysis["largest_files"]:
+            size_kb = file["size"] / 1024
+
+            print(f"{file['path']:<40} {size_kb:>0.2f} KB")
+
     except requests.RequestException as error:
         print(f"Network error: {error}")
 
