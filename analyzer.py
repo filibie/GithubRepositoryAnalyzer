@@ -1,15 +1,25 @@
 import sys
+from urllib.parse import urlparse
+
 import requests
 
+def parse_repository_url(url: str) -> tuple[str, str]:
+    parsed_url = urlparse(url)
 
-def get_repository(url: str) -> dict:
-    parts = url.rstrip("/").split("/")
+    if parsed_url.netloc != "github.com":
+        raise ValueError("Invalid Github URL")
+    
+    parts = parsed_url.path.strip("/").split("/")
 
     if len(parts) < 2:
-        raise ValueError("Invalid GitHub repository URL")
+        raise ValueError("URL must point to GitHub repository")
 
-    owner = parts[-2]
-    repo = parts[-1]
+    owner, repo = parts
+
+    return owner, repo
+
+def get_repository(url: str) -> dict:
+    owner, repo = parse_repository_url(url)
 
     api_url = f"https://api.github.com/repos/{owner}/{repo}"
 
@@ -49,6 +59,38 @@ def print_repository_info(repository: dict) -> None:
     print()
 
 
+def get_languages(owner: str, repo: str) -> dict:
+    api_url = f"https://api.github.com/repos/{owner}/{repo}/languages"
+    response = requests.get(api_url)
+    response.raise_for_status()
+
+    return response.json()
+
+
+def calculate_language_percentages(languages: dict) -> dict:
+    total = sum(languages.values())
+
+    percentages = {}
+
+    for language, bytes_count in languages.items():
+        percentage = (bytes_count / total) * 100
+        percentages[language] = percentage
+
+    return percentages
+
+
+def print_languages(percentages: dict) -> None:
+    print("\nLanguages")
+    print("-" * 50)
+
+    for language, percentage in sorted(
+        percentages.items(),
+        key=lambda item: item[1],
+        reverse=True
+    ):
+        print(f"{language:<15} {percentage:>6.2f}%")
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage:")
@@ -58,8 +100,15 @@ def main() -> None:
     url = sys.argv[1]
 
     try:
+        owner, repo = parse_repository_url(url)
+
         repository = get_repository(url)
+        
+        languages = get_languages(owner, repo)
+        percentages = calculate_language_percentages(languages)
+        
         print_repository_info(repository)
+        print_languages(percentages)
 
     except requests.RequestException as error:
         print(f"Network error: {error}")
