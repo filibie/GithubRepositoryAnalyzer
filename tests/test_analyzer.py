@@ -6,7 +6,8 @@ from github_analyzer.analysis import (
     calculate_language_percentages,
     analyze_files,
     analyze_tree,
-    classify_extensions
+    classify_extensions,
+    count_files_by_category
 )
 
 def test_parse_repository_url():
@@ -152,3 +153,22 @@ def test_classify_extensions():
         ".xzy" not in extensions
         for extensions in result.values()
     )
+
+
+def test_count_files_by_category():
+    extensions = {
+        ".py": 37,
+        ".md": 13,
+        ".png": 5,
+        ".json": 4,
+        ".yml": 10,
+        ".rst": 16,
+        ".css": 1,
+    }
+
+    result = count_files_by_category(extensions, classify_extensions(extensions))
+
+    assert result["source_code"] == 38
+    assert result["documentation"] == 29
+    assert result["assets"] == 5
+    assert result["configuration"] == 14

@@ -77,3 +77,24 @@ def classify_extensions(extensions: dict) -> dict:
     
 
     return result
+
+
+def count_files_by_category(
+        extensions: dict,
+        classified_extensions: dict,
+) -> dict:
+    result = {
+        "source_code": 0,
+        "documentation": 0,
+        "assets": 0,
+        "configuration": 0,
+    }
+
+    for category, classified_ext in classified_extensions.items():
+            total = 0
+            for extension in classified_ext:
+                # print(f"{category} {classified_ext}")
+                total += extensions[extension]
+            result[category] = total
+
+    return result
