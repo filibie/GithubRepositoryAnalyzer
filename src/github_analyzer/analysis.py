@@ -29,6 +29,8 @@ def analyze_files(tree: list) -> dict:
         "total_files": len(files),
         "extensions": {},
         "test_files": 0,
+        "test_file_percentage": 0.0,
+        "files_by_category": {},
         "largest_files": []
     }
 
@@ -53,4 +55,66 @@ def analyze_files(tree: list) -> dict:
             "size": file["size"]
         })
 
+    result["test_file_percentage"] = calculate_test_files_percentage(result["test_files"], result["total_files"])
+    result["files_by_category"] = count_files_by_category(result["extensions"], classify_extensions(result["extensions"]))
+
     return result
+
+def classify_extensions(extensions: dict) -> dict:
+    defined_extensions = {
+        "source_code": { ".py", ".java", ".js", ".css" },
+        "documentation":  { ".md", ".rst" },
+        "assets": { ".png" },
+        "configuration": { ".json", ".yaml" , ".yml"},
+    }
+
+    result = {
+        "source_code": [],
+        "documentation": [],
+        "assets": [],
+        "configuration": [],
+        "other": [],
+    }
+
+    for extension in extensions:
+        matched = False
+        for category, known_extensions in defined_extensions.items():
+            if extension in known_extensions:
+                result[category].append(extension)
+                matched = True
+        if not matched:
+            result["other"].append(extension)
+
+    return result
+
+
+def count_files_by_category(
+        extensions: dict,
+        classified_extensions: dict,
+) -> dict:
+    result = {
+        "source_code": 0,
+        "documentation": 0,
+        "assets": 0,
+        "configuration": 0,
+        "other": 0,
+    }
+
+    for category, classified_ext in classified_extensions.items():
+            total = 0
+            print(category)
+            print(classified_ext)
+            for extension in classified_ext:
+                # print(f"{category} {classified_ext}")
+                total += extensions[extension]
+            result[category] = total
+
+    return result
+
+
+def calculate_test_files_percentage(total_files: int, test_files: int) -> float:
+    if test_files == 0 or total_files == 0:
+        return 0.0
+
+    return test_files / total_files * 100.0
+

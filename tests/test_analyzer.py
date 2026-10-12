@@ -5,7 +5,10 @@ from github_analyzer.github import parse_repository_url
 from github_analyzer.analysis import (
     calculate_language_percentages,
     analyze_files,
-    analyze_tree
+    analyze_tree,
+    classify_extensions,
+    count_files_by_category,
+    calculate_test_files_percentage,
 )
 
 def test_parse_repository_url():
@@ -115,3 +118,69 @@ def test_analyze_files():
 
     assert result["largest_files"][1]["path"] == "src/utils.py"
     assert result["largest_files"][1]["size"] == 2000
+
+
+def test_classify_extensions():
+    empty = classify_extensions({})
+
+    assert empty == {
+        "source_code": [],
+        "documentation": [],
+        "assets": [],
+        "configuration": [],
+        "other": [],
+    }
+
+    extensions = {
+        ".py": 37,
+        ".md": 13,
+        ".png": 5,
+        ".json": 4,
+        ".yml": 10,
+        ".rst": 16,
+        ".css": 1,
+        "Dockerfile": 1,
+    }
+
+    result = classify_extensions(extensions)
+
+    assert ".py" in result["source_code"]
+    assert ".css" in result["source_code"]
+    assert ".json" in result["configuration"]
+    assert ".yml" in result["configuration"]
+    assert ".md" in result["documentation"]
+    assert ".rst" in result["documentation"]
+    assert ".png" in result["assets"]
+    assert "Dockerfile" in result["other"]
+
+    assert all(
+        ".xzy" not in extensions
+        for extensions in result.values()
+    )
+
+
+def test_count_files_by_category():
+    extensions = {
+        ".py": 37,
+        ".md": 13,
+        ".png": 5,
+        ".json": 4,
+        ".yml": 10,
+        ".rst": 16,
+        ".css": 1,
+        "Dockerfile": 2,
+    }
+
+    result = count_files_by_category(extensions, classify_extensions(extensions))
+    print(result)
+    assert result["source_code"] == 38
+    assert result["documentation"] == 29
+    assert result["assets"] == 5
+    assert result["configuration"] == 14
+    assert result["other"] == 2
+
+
+def test_calculate_test_files_percentage():
+    assert calculate_test_files_percentage(100, 12) == 12.0
+    assert calculate_test_files_percentage(50, 0) == 0.0
+    assert calculate_test_files_percentage(0, 0) == 0.0
