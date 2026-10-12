@@ -7,7 +7,8 @@ from github_analyzer.analysis import (
     analyze_files,
     analyze_tree,
     classify_extensions,
-    count_files_by_category
+    count_files_by_category,
+    calculate_test_files_percentage,
 )
 
 def test_parse_repository_url():
@@ -127,6 +128,7 @@ def test_classify_extensions():
         "documentation": [],
         "assets": [],
         "configuration": [],
+        "other": [],
     }
 
     extensions = {
@@ -137,6 +139,7 @@ def test_classify_extensions():
         ".yml": 10,
         ".rst": 16,
         ".css": 1,
+        "Dockerfile": 1,
     }
 
     result = classify_extensions(extensions)
@@ -148,6 +151,7 @@ def test_classify_extensions():
     assert ".md" in result["documentation"]
     assert ".rst" in result["documentation"]
     assert ".png" in result["assets"]
+    assert "Dockerfile" in result["other"]
 
     assert all(
         ".xzy" not in extensions
@@ -164,11 +168,19 @@ def test_count_files_by_category():
         ".yml": 10,
         ".rst": 16,
         ".css": 1,
+        "Dockerfile": 2,
     }
 
     result = count_files_by_category(extensions, classify_extensions(extensions))
-
+    print(result)
     assert result["source_code"] == 38
     assert result["documentation"] == 29
     assert result["assets"] == 5
     assert result["configuration"] == 14
+    assert result["other"] == 2
+
+
+def test_calculate_test_files_percentage():
+    assert calculate_test_files_percentage(100, 12) == 12.0
+    assert calculate_test_files_percentage(50, 0) == 0.0
+    assert calculate_test_files_percentage(0, 0) == 0.0
