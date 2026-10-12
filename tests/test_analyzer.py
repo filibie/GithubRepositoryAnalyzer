@@ -5,7 +5,8 @@ from github_analyzer.github import parse_repository_url
 from github_analyzer.analysis import (
     calculate_language_percentages,
     analyze_files,
-    analyze_tree
+    analyze_tree,
+    classify_extensions
 )
 
 def test_parse_repository_url():
@@ -115,3 +116,39 @@ def test_analyze_files():
 
     assert result["largest_files"][1]["path"] == "src/utils.py"
     assert result["largest_files"][1]["size"] == 2000
+
+
+def test_classify_extensions():
+    empty = classify_extensions({})
+
+    assert empty == {
+        "source_code": [],
+        "documentation": [],
+        "assets": [],
+        "configuration": [],
+    }
+
+    extensions = {
+        ".py": 37,
+        ".md": 13,
+        ".png": 5,
+        ".json": 4,
+        ".yml": 10,
+        ".rst": 16,
+        ".css": 1,
+    }
+
+    result = classify_extensions(extensions)
+
+    assert ".py" in result["source_code"]
+    assert ".css" in result["source_code"]
+    assert ".json" in result["configuration"]
+    assert ".yml" in result["configuration"]
+    assert ".md" in result["documentation"]
+    assert ".rst" in result["documentation"]
+    assert ".png" in result["assets"]
+
+    assert all(
+        ".xzy" not in extensions
+        for extensions in result.values()
+    )

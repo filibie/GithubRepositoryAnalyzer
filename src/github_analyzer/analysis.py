@@ -54,3 +54,26 @@ def analyze_files(tree: list) -> dict:
         })
 
     return result
+
+def classify_extensions(extensions: dict) -> dict:
+    defined_extensions = {
+        "source_code": { ".py", ".java", ".js", ".css" },
+        "documentation":  { ".md", ".rst" },
+        "assets": { ".png" },
+        "configuration": { ".json", ".yaml" , ".yml"},
+    }
+
+    result = {
+        "source_code": [],
+        "documentation": [],
+        "assets": [],
+        "configuration": [],
+    }
+
+    for extension in extensions:
+        for category, known_extensions in defined_extensions.items():
+            if extension in known_extensions:
+                result[category].append(extension)
+    
+
+    return result
