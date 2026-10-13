@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "github-repository-analyzer"
+name = "github_analyzer"
 version = "0.1.0"
 description = "A tool for analyzing GitHub repositories"
 requires-python = ">=3.14"

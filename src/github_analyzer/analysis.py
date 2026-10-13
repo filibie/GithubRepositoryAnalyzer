@@ -118,3 +118,15 @@ def calculate_test_files_percentage(total_files: int, test_files: int) -> float:
 
     return test_files / total_files * 100.0
 
+
+def generate_health_warnings(
+        test_file_percentage: float,
+        largest_files: list,
+) -> list:
+    warnings = []
+    if test_file_percentage < 5.0:
+        warnings.append({"type": "WARNING", "message": "Repository has low proportion of test files"})
+    if len(largest_files) > 0 and largest_files[0]["size"] > 1_000_000:
+        warnings.append({"type": "WARNING", "message": "Repository contains a very large file"})
+
+    return warnings

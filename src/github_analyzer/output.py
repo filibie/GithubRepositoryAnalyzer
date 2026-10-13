@@ -55,3 +55,14 @@ def print_file_analysis(file_analysis: dict) -> None:
         size_kb = file["size"] / 1024
 
         print(f"{file['path']:<40} {size_kb:>0.2f} KB")
+
+
+def print_health_warnings(warnings: list) -> None:
+    print("\nRepository Health")
+    print("-" * 50)
+
+    if not warnings:
+        print("No health warnings found")
+    else:
+        for warn in warnings:
+            print(f"[{warn['type']}] {warn['message']}")

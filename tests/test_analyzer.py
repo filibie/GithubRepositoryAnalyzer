@@ -9,6 +9,7 @@ from github_analyzer.analysis import (
     classify_extensions,
     count_files_by_category,
     calculate_test_files_percentage,
+    generate_health_warnings,
 )
 
 def test_parse_repository_url():
@@ -184,3 +185,38 @@ def test_calculate_test_files_percentage():
     assert calculate_test_files_percentage(100, 12) == 12.0
     assert calculate_test_files_percentage(50, 0) == 0.0
     assert calculate_test_files_percentage(0, 0) == 0.0
+
+
+def test_generate_health_warnings():
+    res = generate_health_warnings(3.0, [
+        {"path": "assets/logo.png", "size": 1200000},
+        {"path": "src/main.py", "size": 1500},
+    ])
+
+    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
+    assert {"type": "WARNING", "message": "Repository contains a very large file"} in res
+
+
+def test_generate_health_warnings_for_healthy_repository():
+    res = generate_health_warnings(20.0, [
+        {"path": "assets/logo.png", "size": 50000},
+        {"path": "src/main.py", "size": 1500},
+    ])
+
+    assert res == []
+
+
+def test_generate_health_warnings_for_no_test_files():
+    res = generate_health_warnings(0.0, [
+        {"path": "assets/logo.png", "size": 50000},
+        {"path": "src/main.py", "size": 1500},
+    ])
+
+    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
+
+
+def test_generate_health_warnings_for_no_files():
+    res = generate_health_warnings(0.0, [])
+
+
+    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
