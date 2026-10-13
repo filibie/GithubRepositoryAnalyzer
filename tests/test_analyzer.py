@@ -194,7 +194,7 @@ def test_generate_health_warnings():
     ])
 
     assert {"type": "WARNING", "message": "Repository has low proportion of test files: 3.0%"} in res
-    assert {"type": "WARNING", "message": "Repository contains a very large file"} in res
+    assert {"type": "WARNING", "message": 'Very large file: assets/logo.png (1.20 MB)'} in res
 
 
 def test_generate_health_warnings_for_healthy_repository():
