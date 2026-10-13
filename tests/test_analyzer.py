@@ -197,6 +197,15 @@ def test_generate_health_warnings():
     assert {"type": "WARNING", "message": 'Very large file: assets/logo.png (1.20 MB)'} in res
 
 
+def test_generate_health_warnings_file_size_threshold():
+    res = generate_health_warnings(3.0, [
+        {"path": "assets/logo.png", "size": 1000000},
+        {"path": "src/main.py", "size": 1500},
+    ])
+
+    assert {"type": "WARNING", "message": "Repository has low proportion of test files: 3.0%"} in res
+
+    
 def test_generate_health_warnings_for_healthy_repository():
     res = generate_health_warnings(20.0, [
         {"path": "assets/logo.png", "size": 50000},
@@ -217,6 +226,5 @@ def test_generate_health_warnings_for_no_test_files():
 
 def test_generate_health_warnings_for_no_files():
     res = generate_health_warnings(0.0, [])
-
 
     assert {"type": "WARNING", "message": "Repository has no test files!"} in res
