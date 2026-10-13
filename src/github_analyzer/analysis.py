@@ -124,8 +124,10 @@ def generate_health_warnings(
         largest_files: list,
 ) -> list:
     warnings = []
-    if test_file_percentage < 5.0:
-        warnings.append({"type": "WARNING", "message": "Repository has low proportion of test files"})
+    if test_file_percentage == 0.0:
+        warnings.append({"type": "WARNING", "message": "Repository has no test files!"})
+    elif test_file_percentage < 5.0:
+        warnings.append({"type": "WARNING", "message": f"Repository has low proportion of test files: {test_file_percentage}%"})
     if len(largest_files) > 0 and largest_files[0]["size"] > 1_000_000:
         warnings.append({"type": "WARNING", "message": "Repository contains a very large file"})
 

@@ -193,7 +193,7 @@ def test_generate_health_warnings():
         {"path": "src/main.py", "size": 1500},
     ])
 
-    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
+    assert {"type": "WARNING", "message": "Repository has low proportion of test files: 3.0%"} in res
     assert {"type": "WARNING", "message": "Repository contains a very large file"} in res
 
 
@@ -212,11 +212,11 @@ def test_generate_health_warnings_for_no_test_files():
         {"path": "src/main.py", "size": 1500},
     ])
 
-    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
+    assert {"type": "WARNING", "message": "Repository has no test files!"} in res
 
 
 def test_generate_health_warnings_for_no_files():
     res = generate_health_warnings(0.0, [])
 
 
-    assert {"type": "WARNING", "message": "Repository has low proportion of test files"} in res
+    assert {"type": "WARNING", "message": "Repository has no test files!"} in res
